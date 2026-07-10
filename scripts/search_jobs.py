@@ -42,6 +42,11 @@ def search_track(track, location, serpapi_cfg, api_key):
     return data.get("jobs_results", [])
 
 
+def get_job_link(job):
+    apply_options = job.get("apply_options") or []
+    return apply_options[0]["link"] if apply_options else job.get("share_link", "N/A")
+
+
 def print_jobs(track_name, jobs):
     print(f"\n=== {track_name} ({len(jobs)} results) ===")
     if not jobs:
@@ -53,11 +58,8 @@ def print_jobs(track_name, jobs):
         company = job.get("company_name", "N/A")
         location = job.get("location", "N/A")
 
-        apply_options = job.get("apply_options") or []
-        link = apply_options[0]["link"] if apply_options else job.get("share_link", "N/A")
-
         print(f"- {title} | {company} | {location}")
-        print(f"  {link}")
+        print(f"  {get_job_link(job)}")
 
 
 def main():
