@@ -54,5 +54,5 @@ storage:
 # (without the @) if public, or its numeric chat ID if private - Telethon
 # can resolve either once logged in.
 telegram:
-  group: ""   # TODO: fill in with the group's username or chat ID
+  group: "HiTech_Jobs_In_Israel"
   hours_lookback: 24
