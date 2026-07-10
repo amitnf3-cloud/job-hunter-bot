@@ -3,3 +3,4 @@ PyYAML==6.0.2
 python-dotenv==1.0.1
 anthropic>=0.40.0
 telethon>=1.36.0
+beautifulsoup4>=4.12.0
