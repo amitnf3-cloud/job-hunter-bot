@@ -75,7 +75,11 @@ def main():
     track_results = []
     for track in config["tracks"]:
         resume_text = load_resume(track["resume_file"])
-        jobs = search_track(track, location, config["serpapi"], serpapi_key)
+        try:
+            jobs = search_track(track, location, config["serpapi"], serpapi_key)
+        except Exception as exc:
+            print(f"[{track['name']}] WARNING: search failed, skipping this track: {exc}")
+            jobs = []
 
         scored_jobs = []
         for job in jobs:

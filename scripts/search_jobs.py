@@ -23,21 +23,34 @@ def load_config():
 
 
 def search_track(track, location, serpapi_cfg, api_key):
+    # "jobs in <location>" reads as a natural phrase to Google Jobs. Appending
+    # the raw location straight onto an "OR"-chain query (no connector) used
+    # to produce queries like "...OR Business Intelligence Analyst Tel Aviv,
+    # Israel", which Google parsed as a literal job title and matched nothing.
+    query = f"{track['search_query']} jobs in {location}"
     params = {
         "engine": serpapi_cfg["engine"],
-        "q": f"{track['search_query']} {location}",
+        "q": query,
         "location": location,
         "google_domain": serpapi_cfg["google_domain"],
         "hl": serpapi_cfg["hl"],
         "gl": serpapi_cfg["gl"],
         "api_key": api_key,
     }
+
+    print(f"[{track['name']}] SerpApi request: q={query!r}, location={location!r}")
+
     response = requests.get(SERPAPI_URL, params=params, timeout=30)
     response.raise_for_status()
     data = response.json()
 
     if "error" in data:
-        raise RuntimeError(f"SerpApi error: {data['error']}")
+        # SerpApi reports zero matches as a normal 200 response with an
+        # "error" field (e.g. "Google hasn't returned any results for this
+        # query") rather than an HTTP failure - treat it as an empty result,
+        # not a fatal error.
+        print(f"[{track['name']}] WARNING: SerpApi returned no results: {data['error']}")
+        return []
 
     return data.get("jobs_results", [])
 
@@ -76,7 +89,11 @@ def main():
     location = config["location"]["city"]
 
     for track in config["tracks"]:
-        jobs = search_track(track, location, config["serpapi"], api_key)
+        try:
+            jobs = search_track(track, location, config["serpapi"], api_key)
+        except Exception as exc:
+            print(f"[{track['name']}] WARNING: search failed, skipping this track: {exc}")
+            jobs = []
         print_jobs(track["name"], jobs)
 
 

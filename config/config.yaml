@@ -9,12 +9,12 @@ location:
 tracks:
   - id: data_analyst
     name: "Data Analyst / BI"
-    search_query: "Data Analyst OR BI Analyst OR Business Intelligence Analyst"
+    search_query: "Data Analyst OR BI Analyst"
     resume_file: "resumes/data_analyst_resume.txt"
 
   - id: project_manager
     name: "Project Manager / Operations"
-    search_query: "Project Manager OR Operations Manager OR Program Manager"
+    search_query: "Project Manager OR Operations Manager"
     resume_file: "resumes/project_manager_resume.txt"
 
 # SerpApi Google Jobs settings (https://serpapi.com/google-jobs-api)
