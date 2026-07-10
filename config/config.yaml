@@ -25,6 +25,14 @@ tracks:
       - "business intelligence"
       - "data analytics"
       - "analytics engineer"
+      - "system analyst"
+      - "systems analyst"
+      # Compound phrases, not bare "product manager" - a data-flavored PM
+      # role should also get scored against the data/BI resume, but a
+      # generic Product Manager posting (unrelated to data) shouldn't.
+      - "data product manager"
+      - "product manager - data"
+      - "product manager, data"
 
   - id: project_manager
     name: "Project Manager / Operations"
@@ -36,6 +44,8 @@ tracks:
       - "operations manager"
       - "program manager"
       - "pmo"
+      - "operations specialist"
+      - "production specialist"
 
 # SerpApi Google Jobs settings (https://serpapi.com/google-jobs-api)
 serpapi:
