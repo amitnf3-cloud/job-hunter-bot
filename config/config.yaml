@@ -48,3 +48,11 @@ email:
 # Where the bot keeps track of jobs it has already sent, to avoid duplicates.
 storage:
   seen_jobs_file: "data/seen_jobs.json"
+
+# Telegram job source (replacing SerpApi/Google Jobs, which had no usable
+# coverage for Israel). "group" is the channel/group's public @username
+# (without the @) if public, or its numeric chat ID if private - Telethon
+# can resolve either once logged in.
+telegram:
+  group: ""   # TODO: fill in with the group's username or chat ID
+  hours_lookback: 24
