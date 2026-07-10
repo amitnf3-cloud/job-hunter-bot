@@ -2,10 +2,12 @@
 # Edit these values to tune what the bot searches for and how it scores results.
 
 location:
-  # TEMPORARY: testing Google's canonical place name for Tel Aviv, since
-  # SerpApi resolves the location string against its own locations database
-  # and "Tel Aviv, Israel" may not match cleanly.
-  city: "Tel Aviv-Yafo, Tel Aviv District, Israel"
+  # TEMPORARY SANITY CHECK: three Tel Aviv/Israel variations all returned
+  # an identical zero-result error from SerpApi, which points at something
+  # structural (gl='il', or account/plan access) rather than query wording.
+  # Testing a well-known US location to isolate whether the pipeline can
+  # return real jobs at all when the location isn't Israel-specific.
+  city: "Austin, TX"
   radius_km: 10
 
 # Each track is searched separately and scored against its own resume.
@@ -28,7 +30,9 @@ serpapi:
   engine: "google_jobs"
   google_domain: "google.com"
   hl: "en"   # interface language
-  gl: "il"   # country
+  # TEMPORARY SANITY CHECK: gl set to "us" to match the Austin, TX test
+  # location above - see the "location" section comment for why.
+  gl: "us"   # country
 
 # AI scoring settings (Claude API)
 scoring:
