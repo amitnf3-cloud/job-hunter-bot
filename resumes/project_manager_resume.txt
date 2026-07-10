@@ -1,5 +1,76 @@
-PASTE YOUR PROJECT MANAGER / OPERATIONS RESUME TEXT HERE.
+Amit Nakar Fogel
+Results-driven team player with strong analytical thinking and a high
+work ethic. A fast self-learner who adapts quickly to new
+environments and requirements. Experienced in working with cross-
+functional teams, translating business needs into data-driven
+solutions. Committed to finding balanced solutions that create value
+for all parties involved.
+Known for excellent interpersonal communication skills and the ability
+to lead and motivate people. Seeking a Project Manager role.
 
-This file's contents will be sent to the Claude API as the reference resume
-for scoring Project Manager / Operations job postings. Plain text is fine —
-no need to format it nicely, just paste the full resume content.
+Tel Aviv, Israel
+054-9167594
+amitnf3@gmail.com
+LinkedIn: Amit Nakar Fogel
+
+EXPERIENCE
+
+SOC Analyst - Data Analysis Focus, Ministry of Energy
+01.01.2025-present
+- Worked closely with cybersecurity analysts, IT teams, and stakeholders to translate
+  operational and investigative requirements into usable data outputs in Splunk.
+- Gathered and clarified requirements from SOC analysts and investigators, including field
+  extraction, parsing, and data adjustments based on investigative needs.
+- Implemented and maintained data parsing logic (fields, regex, and transformations) to
+  improve data usability and support investigative workflows.
+- Supported integration and correlation of multiple data sources in collaboration with IT
+  teams to ensure data consistency and accessibility.
+- Assisted in improving analytical and monitoring workflows by adjusting dashboards,
+  searches, and data models based on feedback from security teams.
+- Participated in troubleshooting and problem-solving sessions with analysts to refine data
+  visibility and support incident investigations.
+
+Security Service man, The National Cyber Array
+2022-2025
+- Guard at the Government Cyber Facility in Beer Sheva, responsible for the security of
+  classified information and systems.
+- Utilized multitasking skills to manage various security protocols and ensure the safety of
+  the facility.
+- Demonstrated high social abilities in interacting with colleagues and stakeholders.
+
+MILITARY SERVICE
+
+Paratroopers Brigade, IDF
+2017-2020
+- Served as a fighter in Infantry Regiment 202, fulfilling the role of Commander Assistant.
+- Awarded a regimental excellence commendation for demonstrating exceptional courage,
+  dedication, leadership, teamwork, camaraderie, selflessness and helpfulness.
+
+EDUCATION
+
+B.A. in Information Systems Management
+Ben Gurion University
+Graduated with Honors, Final GPA- 88.
+2022-2025
+
+Full matriculation
+Hadarim High School - Hod Hasharon
+2014-2017
+
+TOOLS & TECHNOLOGIES
+- MS Project
+- SPL-Splunk
+- SQL
+- Power BI
+- Tableau
+- R
+
+TECHNICAL SKILLS
+- Java
+- JavaScript
+- Python
+- Proficiency in Microsoft Office & Google applications
+
+LANGUAGES
+Hebrew - Native
+English - High level

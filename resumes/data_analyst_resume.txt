@@ -1,5 +1,74 @@
-PASTE YOUR DATA ANALYST / BI RESUME TEXT HERE.
+Amit Nakar Fogel
+Team-worker, fast and self-learner, strong analytical skills, responsible
+and dedicated to missions, curious with high social skills.
+Passionate for data and analytics, I'm eager to leverage my education and
+skills in data-driven environments.
+I have high work ethic, creative mindset, out of the box thinking and loyal to
+workplaces.
 
-This file's contents will be sent to the Claude API as the reference resume
-for scoring Data Analyst / BI job postings. Plain text is fine — no need to
-format it nicely, just paste the full resume content.
+Tel Aviv, Israel
+054-9167594
+amitnf3@gmail.com
+LinkedIn: Amit Nakar Fogel
+
+EXPERIENCE
+
+SOC Analyst - Data Analysis Focus, Ministry of Energy
+01.01.2025-present
+- Analyzed large-scale datasets using Splunk and big data technologies to identify trends,
+  anomalies, and actionable insights.
+- Designed and developed interactive dashboards, reports, and visualizations while building
+  and optimizing complex SPL queries to support KPI tracking and data-driven decision-making.
+- Extracted, parsed, normalized, enriched, and correlated structured and unstructured data
+  from multiple sources to improve data quality, analytical accuracy and reporting efficiency.
+- Developed data models, business rules, correlation logic and automated alerts to
+  streamline analytical processes and optimize operational workflows.
+- Collaborated with cross-functional teams to translate business requirements into scalable
+  data solutions, perform analytical investigations, and deliver actionable recommendations.
+- Used SIEM to monitor and investigate security events, correlate logs across multiple
+  sources, and analyze network traffic (TCP/IP, HTTP/S, DNS) to identify anomalies and
+  support incident investigations.
+
+Security Service man, The National Cyber Array
+2022-2025
+- Guard at the Government Cyber Facility in Beer Sheva, responsible for the security of
+  classified information and systems.
+- Utilized multitasking skills to manage various security protocols and ensure the safety of
+  the facility.
+- Demonstrated high social abilities in interacting with colleagues and stakeholders.
+
+MILITARY SERVICE
+
+Paratroopers Brigade, IDF
+2017-2020
+- Served as a fighter in Infantry Regiment 202, fulfilling the role of Commander Assistant.
+- Awarded a regimental excellence commendation for demonstrating exceptional courage,
+  dedication, leadership, teamwork, camaraderie, selflessness and helpfulness.
+
+EDUCATION
+
+B.A. in Information Systems Management
+Ben Gurion University
+Graduated with Honors, Final GPA- 88.
+2022-2025
+
+Full matriculation
+Hadarim High School - Hod Hasharon
+2014-2017
+
+DATA ANALYSIS TOOLS
+- SPL-Splunk
+- SQL
+- Power BI
+- Tableau
+- R
+
+TECHNICAL SKILLS
+- Java
+- JavaScript
+- Python
+- Proficiency in Microsoft Office & Google applications
+
+LANGUAGES
+Hebrew - Native
+English - High level
