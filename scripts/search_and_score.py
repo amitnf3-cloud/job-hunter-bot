@@ -81,6 +81,10 @@ def main():
             print(f"[{track['name']}] WARNING: search failed, skipping this track: {exc}")
             jobs = []
 
+        # --- TEMPORARY DEBUG LOGGING: remove once we've confirmed results look right ---
+        print(f"[{track['name']}] DEBUG: SerpApi returned {len(jobs)} raw job(s) before scoring")
+        # --- end temporary debug logging ---
+
         scored_jobs = []
         for job in jobs:
             job_id = get_job_id(job)
@@ -90,6 +94,10 @@ def main():
             result = score_job(job, resume_text, client)
             scored_jobs.append((result["score"], result["reason"], job))
             seen[job_id] = today
+
+            # --- TEMPORARY DEBUG LOGGING: remove once we've confirmed results look right ---
+            print(f"[{track['name']}] DEBUG: '{job.get('title', 'N/A')}' -> score {result['score']}/10")
+            # --- end temporary debug logging ---
 
         scored_jobs.sort(key=lambda entry: entry[0], reverse=True)
         print_scored_jobs(track["name"], scored_jobs)
