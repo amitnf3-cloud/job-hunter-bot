@@ -17,12 +17,25 @@ tracks:
     # whether Google Jobs' search box honors "OR" as an operator at all.
     search_query: "Data Analyst"
     resume_file: "resumes/data_analyst_resume.txt"
+    # Used for keyword-filtering Telegram messages (case-insensitive
+    # substring match). Add more terms as false negatives show up.
+    keywords:
+      - "data analyst"
+      - "bi analyst"
+      - "business intelligence"
+      - "data analytics"
+      - "analytics engineer"
 
   - id: project_manager
     name: "Project Manager / Operations"
     # TEMPORARY: same single-term test as the track above.
     search_query: "Project Manager"
     resume_file: "resumes/project_manager_resume.txt"
+    keywords:
+      - "project manager"
+      - "operations manager"
+      - "program manager"
+      - "pmo"
 
 # SerpApi Google Jobs settings (https://serpapi.com/google-jobs-api)
 serpapi:
@@ -56,3 +69,22 @@ storage:
 telegram:
   group: "HiTech_Jobs_In_Israel"
   hours_lookback: 24
+  # A message is EXCLUDED only if it mentions a location_exclude_keywords
+  # term and does NOT also mention a location_keywords term. A message that
+  # doesn't mention location at all is included - this filter only cuts
+  # obvious noise before spending Claude tokens; the scoring step already
+  # judges location fit well on its own.
+  location_keywords:
+    - "tel aviv"
+    - "תל אביב"
+    - "gush dan"
+    - "גוש דן"
+    - "remote"
+    - "hybrid"
+  location_exclude_keywords:
+    - "usa"
+    - "united states"
+    - "new york"
+    - "san francisco"
+    - "europe"
+    - "uk "
