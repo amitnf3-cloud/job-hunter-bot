@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
-"""Search both tracks for real jobs, score each one against its resume, and
-skip jobs already seen in a previous run.
+"""Search both tracks for real jobs, score each one against its resume, skip
+jobs already seen in a previous run, and email a digest of the rest.
 
-Wires search_jobs.py (SerpApi Google Jobs search) into score_job.py (Claude
-API scoring), with seen_jobs.py tracking which jobs have already been found
-so the same posting is never scored or shown twice. No email yet - just the
-combined search+score+dedup pipeline.
+Wires together search_jobs.py (SerpApi Google Jobs search), score_job.py
+(Claude API scoring), seen_jobs.py (duplicate tracking), and send_email.py
+(the Gmail SMTP digest) into the full daily pipeline.
 """
 
 import os
@@ -19,6 +18,7 @@ from dotenv import load_dotenv
 from search_jobs import load_config, search_track, get_job_link, get_job_id
 from score_job import score_job
 from seen_jobs import load_seen, save_seen, prune_old_entries
+from send_email import build_email_html, send_email
 
 load_dotenv()  # loads .env into the environment for local runs, if present
 
@@ -54,14 +54,25 @@ def main():
     if not anthropic_key:
         sys.exit("ERROR: ANTHROPIC_API_KEY environment variable is not set.")
 
+    gmail_address = os.environ.get("GMAIL_ADDRESS")
+    gmail_app_password = os.environ.get("GMAIL_APP_PASSWORD")
+    email_to = os.environ.get("EMAIL_TO")
+    if not all([gmail_address, gmail_app_password, email_to]):
+        sys.exit(
+            "ERROR: GMAIL_ADDRESS, GMAIL_APP_PASSWORD, and EMAIL_TO "
+            "environment variables must all be set."
+        )
+
     config = load_config()
     location = config["location"]["city"]
+    min_score = config["scoring"]["min_score_to_include"]
     client = anthropic.Anthropic()
 
     seen_jobs_path = REPO_ROOT / config["storage"]["seen_jobs_file"]
     seen = prune_old_entries(load_seen(seen_jobs_path))
     today = date.today().isoformat()
 
+    track_results = []
     for track in config["tracks"]:
         resume_text = load_resume(track["resume_file"])
         jobs = search_track(track, location, config["serpapi"], serpapi_key)
@@ -78,8 +89,14 @@ def main():
 
         scored_jobs.sort(key=lambda entry: entry[0], reverse=True)
         print_scored_jobs(track["name"], scored_jobs)
+        track_results.append((track["name"], scored_jobs))
 
     save_seen(seen_jobs_path, seen)
+
+    html_body, included_count = build_email_html(track_results, min_score)
+    subject = f"{config['email']['subject_prefix']} - {today}"
+    send_email(subject, html_body, gmail_address, gmail_app_password, email_to)
+    print(f"\nEmail sent to {email_to}: {included_count} job(s) scoring {min_score}+.")
 
 
 if __name__ == "__main__":

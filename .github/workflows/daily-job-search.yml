@@ -1,0 +1,43 @@
+name: Daily Job Search
+
+on:
+  schedule:
+    # 05:00 UTC = 07:00 Israel time (IDT, summer) / 07:00 (IST, winter is
+    # actually UTC+2, so this lands ~07:00-08:00 depending on daylight saving).
+    - cron: "0 5 * * *"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  search-score-email:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run job search, scoring, dedup, and email digest
+        env:
+          SERPAPI_API_KEY: ${{ secrets.SERPAPI_API_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GMAIL_ADDRESS: ${{ secrets.GMAIL_ADDRESS }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          EMAIL_TO: ${{ secrets.EMAIL_TO }}
+        run: python scripts/search_and_score.py
+
+      - name: Commit updated seen_jobs.json
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/seen_jobs.json
+          git diff --cached --quiet || git commit -m "Update seen_jobs.json [skip ci]"
+          git push

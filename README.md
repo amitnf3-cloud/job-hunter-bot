@@ -14,24 +14,33 @@ job-hunter-bot/
 │   ├── data_analyst_resume.txt      # paste your Data Analyst/BI resume here
 │   └── project_manager_resume.txt   # paste your PM/Operations resume here
 ├── data/
-│   └── seen_jobs.json        # record of already-sent jobs (starts empty)
+│   └── seen_jobs.json        # record of already-seen jobs (job_id -> date)
+├── scripts/
+│   ├── search_jobs.py         # SerpApi Google Jobs search
+│   ├── score_job.py           # Claude API scoring (1-10 + reason)
+│   ├── seen_jobs.py           # duplicate tracking, 60-day pruning
+│   ├── send_email.py          # HTML digest builder + Gmail SMTP sender
+│   └── search_and_score.py    # the full daily pipeline (entry point)
+├── .github/workflows/
+│   └── daily-job-search.yml   # runs the pipeline every 24 hours
 ├── .env.example               # template for local secrets
 └── .gitignore
 ```
 
 ## Next steps (building incrementally)
 
-1. ~~Folder structure + config~~ (this step)
-2. Paste in your two resumes
-3. Script to query SerpApi Google Jobs and print raw results
-4. Add Claude-based scoring
-5. Add duplicate tracking against `data/seen_jobs.json`
-6. Add Gmail SMTP digest email
-7. Wire it all together into one script
-8. Add a GitHub Actions workflow to run it every 24 hours
+1. ~~Folder structure + config~~
+2. ~~Paste in your two resumes~~
+3. ~~Script to query SerpApi Google Jobs and print raw results~~
+4. ~~Add Claude-based scoring~~
+5. ~~Add duplicate tracking against `data/seen_jobs.json`~~
+6. ~~Add Gmail SMTP digest email~~
+7. ~~Wire it all together into one script~~
+8. ~~Add a GitHub Actions workflow to run it every 24 hours~~ (this step)
 
 ## Secrets
 
 Copy `.env.example` to `.env` and fill in your API keys/app password for local
-testing. In GitHub Actions, the same names will be set as repository secrets
-instead (nothing gets committed).
+testing. In GitHub Actions, the same names are set as repository secrets
+instead (nothing gets committed) - see the setup instructions provided
+alongside this workflow for exactly how to add them.
