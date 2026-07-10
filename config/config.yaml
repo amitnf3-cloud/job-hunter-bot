@@ -9,12 +9,15 @@ location:
 tracks:
   - id: data_analyst
     name: "Data Analyst / BI"
-    search_query: "Data Analyst OR BI Analyst"
+    # TEMPORARY: dropped the "OR" chain to a single plain term to test
+    # whether Google Jobs' search box honors "OR" as an operator at all.
+    search_query: "Data Analyst"
     resume_file: "resumes/data_analyst_resume.txt"
 
   - id: project_manager
     name: "Project Manager / Operations"
-    search_query: "Project Manager OR Operations Manager"
+    # TEMPORARY: same single-term test as the track above.
+    search_query: "Project Manager"
     resume_file: "resumes/project_manager_resume.txt"
 
 # SerpApi Google Jobs settings (https://serpapi.com/google-jobs-api)
