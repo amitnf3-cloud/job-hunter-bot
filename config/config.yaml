@@ -2,7 +2,10 @@
 # Edit these values to tune what the bot searches for and how it scores results.
 
 location:
-  city: "Tel Aviv, Israel"
+  # TEMPORARY: testing Google's canonical place name for Tel Aviv, since
+  # SerpApi resolves the location string against its own locations database
+  # and "Tel Aviv, Israel" may not match cleanly.
+  city: "Tel Aviv-Yafo, Tel Aviv District, Israel"
   radius_km: 10
 
 # Each track is searched separately and scored against its own resume.
