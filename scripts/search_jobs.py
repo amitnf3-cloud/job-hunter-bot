@@ -47,6 +47,11 @@ def get_job_link(job):
     return apply_options[0]["link"] if apply_options else job.get("share_link", "N/A")
 
 
+def get_job_id(job):
+    """A stable, unique key for a job posting, used for duplicate tracking."""
+    return job.get("job_id") or get_job_link(job)
+
+
 def print_jobs(track_name, jobs):
     print(f"\n=== {track_name} ({len(jobs)} results) ===")
     if not jobs:
