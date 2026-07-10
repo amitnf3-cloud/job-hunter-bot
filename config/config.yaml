@@ -1,0 +1,40 @@
+# Job Hunter Bot - Search Configuration
+# Edit these values to tune what the bot searches for and how it scores results.
+
+location:
+  city: "Tel Aviv, Israel"
+  radius_km: 10
+
+# Each track is searched separately and scored against its own resume.
+tracks:
+  - id: data_analyst
+    name: "Data Analyst / BI"
+    search_query: "Data Analyst OR BI Analyst OR Business Intelligence Analyst"
+    resume_file: "resumes/data_analyst_resume.txt"
+
+  - id: project_manager
+    name: "Project Manager / Operations"
+    search_query: "Project Manager OR Operations Manager OR Program Manager"
+    resume_file: "resumes/project_manager_resume.txt"
+
+# SerpApi Google Jobs settings (https://serpapi.com/google-jobs-api)
+serpapi:
+  engine: "google_jobs"
+  google_domain: "google.com"
+  hl: "en"   # interface language
+  gl: "il"   # country
+
+# AI scoring settings (Claude API)
+scoring:
+  scale_min: 1
+  scale_max: 10
+  min_score_to_include: 6   # only jobs scoring this or higher go in the digest
+
+# Email digest settings
+email:
+  subject_prefix: "Job Hunter Daily Digest"
+  recipient: "amitnf3@gmail.com"
+
+# Where the bot keeps track of jobs it has already sent, to avoid duplicates.
+storage:
+  seen_jobs_file: "data/seen_jobs.json"

@@ -1,0 +1,5 @@
+PASTE YOUR DATA ANALYST / BI RESUME TEXT HERE.
+
+This file's contents will be sent to the Claude API as the reference resume
+for scoring Data Analyst / BI job postings. Plain text is fine — no need to
+format it nicely, just paste the full resume content.
