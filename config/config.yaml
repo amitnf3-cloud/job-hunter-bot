@@ -12,6 +12,10 @@ tracks:
       - "data analyst"
       - "bi analyst"
       - "business intelligence"
+      - "business intelligence analyst"
+      - "business analyst"
+      - "product analyst"
+      - "fraud analyst"
       - "data analytics"
       - "analytics engineer"
       - "system analyst"
@@ -57,9 +61,9 @@ storage:
 # can resolve either once logged in.
 telegram:
   group: "HiTech_Jobs_In_Israel"
-  # TEMPORARY: widened from 24 to 48 hours while tuning, to see a bigger
-  # sample in the digest.
-  hours_lookback: 48
+  # Matches the daily schedule in daily-job-search.yml - a 24h lookback
+  # covers exactly the messages since the previous day's run.
+  hours_lookback: 24
   # A message is EXCLUDED only if it mentions a location_exclude_keywords
   # term and does NOT also mention a location_keywords term. A message that
   # doesn't mention location at all is included - this filter only cuts

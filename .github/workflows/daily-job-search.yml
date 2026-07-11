@@ -2,9 +2,11 @@ name: Daily Job Search
 
 on:
   schedule:
-    # 05:00 UTC = 07:00 Israel time (IDT, summer) / 07:00 (IST, winter is
-    # actually UTC+2, so this lands ~07:00-08:00 depending on daylight saving).
-    - cron: "0 5 * * *"
+    # 09:00 UTC = 12:00 PM Israel time while Israel is on daylight saving
+    # time (IDT, UTC+3). When Israel exits daylight saving time later in
+    # the year (IST, UTC+2), this will land at 11:00 AM Israel time instead
+    # - update to "0 10 * * *" at that point to keep it at 12:00 PM.
+    - cron: "0 9 * * *"
   workflow_dispatch: {}
 
 permissions:
