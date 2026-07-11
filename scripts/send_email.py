@@ -10,6 +10,36 @@ GMAIL_SMTP_HOST = "smtp.gmail.com"
 GMAIL_SMTP_PORT = 587
 
 
+def _render_row(score, reason, job):
+    company_description = job.get("company_description")
+    description_html = (
+        f'<span style="color:#555;font-size:0.9em;font-style:italic;">'
+        f'{escape(company_description)}</span><br>'
+        if company_description
+        else ""
+    )
+    return f"""
+    <tr>
+      <td style="padding:8px 12px;border-bottom:1px solid #ddd;
+                 font-weight:bold;font-size:1.1em;vertical-align:top;">
+        {score}/10
+      </td>
+      <td style="padding:8px 12px;border-bottom:1px solid #ddd;">
+        <a href="{escape(job.get("link", "N/A"))}" style="font-weight:bold;
+           text-decoration:none;color:#1a73e8;">
+          {escape(job.get("title", "N/A"))}
+        </a><br>
+        <span style="color:#555;">
+          {escape(job.get("company_name", "N/A"))}
+          &middot; {escape(job.get("location", "N/A"))}
+        </span><br>
+        {description_html}
+        <span style="color:#777;font-size:0.9em;">{escape(reason)}</span>
+      </td>
+    </tr>
+    """
+
+
 def build_email_html(track_results, min_score):
     """track_results: list of (track_name, scored_jobs) tuples, where each
     scored_jobs entry is (score, reason, job). Only jobs scoring >= min_score
@@ -27,28 +57,7 @@ def build_email_html(track_results, min_score):
         included_count += len(included)
 
         if included:
-            rows = "".join(
-                f"""
-                <tr>
-                  <td style="padding:8px 12px;border-bottom:1px solid #ddd;
-                             font-weight:bold;font-size:1.1em;vertical-align:top;">
-                    {score}/10
-                  </td>
-                  <td style="padding:8px 12px;border-bottom:1px solid #ddd;">
-                    <a href="{escape(job.get("link", "N/A"))}" style="font-weight:bold;
-                       text-decoration:none;color:#1a73e8;">
-                      {escape(job.get("title", "N/A"))}
-                    </a><br>
-                    <span style="color:#555;">
-                      {escape(job.get("company_name", "N/A"))}
-                      &middot; {escape(job.get("location", "N/A"))}
-                    </span><br>
-                    <span style="color:#777;font-size:0.9em;">{escape(reason)}</span>
-                  </td>
-                </tr>
-                """
-                for score, reason, job in included
-            )
+            rows = "".join(_render_row(score, reason, job) for score, reason, job in included)
             table = f"""
             <h2 style="margin-top:32px;">{escape(track_name)}</h2>
             <table style="width:100%;border-collapse:collapse;">

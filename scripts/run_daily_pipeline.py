@@ -46,16 +46,32 @@ def build_job_dict(message, description, url, group):
     no separate title/company field, just free text plus whatever we could
     fetch. Use the message's first line as a human-readable headline and
     fall back to a link back to the Telegram post itself if no real URL
-    was found."""
+    was found. location/company_name/company_description start as
+    placeholders and get overwritten with Claude's extraction in
+    apply_extracted_fields(), if it found real values."""
     first_line = message.text.strip().splitlines()[0][:120]
     link = url or f"https://t.me/{group}/{message.id}"
     return {
         "title": first_line,
         "company_name": "N/A",
         "location": "Israel (via Telegram)",
+        "company_description": None,
         "description": description,
         "link": link,
     }
+
+
+def apply_extracted_fields(job, result):
+    """Overwrite job's placeholder location/company_name with Claude's
+    extraction, when it found a real (non-null) value. company_description
+    is left as None (and thus omitted in the email) unless Claude found an
+    actual company-description section - never fabricated."""
+    if result.get("location"):
+        job["location"] = result["location"]
+    if result.get("company_name"):
+        job["company_name"] = result["company_name"]
+    if result.get("company_description"):
+        job["company_description"] = result["company_description"]
 
 
 def get_job_id(message, track):
@@ -70,6 +86,7 @@ def print_scored_jobs(track_name, scored_jobs):
 
     for score, reason, job in scored_jobs:
         print(f"\n[{score}/10] {job['title']}")
+        print(f"  Company: {job['company_name']}  |  Location: {job['location']}")
         print(f"  Reason: {reason}")
         print(f"  Link: {job['link']}")
 
@@ -126,6 +143,7 @@ def main():
         job = build_job_dict(message, description, url, group)
 
         result = score_job(job, resumes[track["id"]], client_ai)
+        apply_extracted_fields(job, result)
         scored_by_track_id[track["id"]].append((result["score"], result["reason"], job))
         seen[job_id] = today
 

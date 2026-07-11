@@ -70,6 +70,11 @@ telegram:
     - "תל אביב"
     - "gush dan"
     - "גוש דן"
+    - "ramat gan"
+    - "רמת גן"
+    - "petah tikva"
+    - "petach tikva"
+    - "פתח תקווה"
     - "remote"
     - "hybrid"
   location_exclude_keywords:
