@@ -38,7 +38,9 @@ tracks:
 scoring:
   scale_min: 1
   scale_max: 10
-  min_score_to_include: 6   # only jobs scoring this or higher go in the digest
+  # TEMPORARY: lowered from 6 to 5 while tuning, to see more borderline
+  # results in the digest.
+  min_score_to_include: 5
 
 # Email digest settings
 email:
@@ -55,7 +57,9 @@ storage:
 # can resolve either once logged in.
 telegram:
   group: "HiTech_Jobs_In_Israel"
-  hours_lookback: 24
+  # TEMPORARY: widened from 24 to 48 hours while tuning, to see a bigger
+  # sample in the digest.
+  hours_lookback: 48
   # A message is EXCLUDED only if it mentions a location_exclude_keywords
   # term and does NOT also mention a location_keywords term. A message that
   # doesn't mention location at all is included - this filter only cuts
