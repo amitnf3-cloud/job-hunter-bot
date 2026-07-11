@@ -11,7 +11,7 @@ permissions:
   contents: write
 
 jobs:
-  search-score-email:
+  telegram-fetch-score-email:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -27,12 +27,14 @@ jobs:
 
       - name: Run job search, scoring, dedup, and email digest
         env:
-          SERPAPI_API_KEY: ${{ secrets.SERPAPI_API_KEY }}
+          TELEGRAM_API_ID: ${{ secrets.TELEGRAM_API_ID }}
+          TELEGRAM_API_HASH: ${{ secrets.TELEGRAM_API_HASH }}
+          TELEGRAM_SESSION_STRING: ${{ secrets.TELEGRAM_SESSION_STRING }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           GMAIL_ADDRESS: ${{ secrets.GMAIL_ADDRESS }}
           GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
           EMAIL_TO: ${{ secrets.EMAIL_TO }}
-        run: python scripts/search_and_score.py
+        run: python scripts/run_daily_pipeline.py
 
       - name: Commit updated seen_jobs.json
         run: |

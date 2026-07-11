@@ -6,8 +6,6 @@ import ssl
 from email.message import EmailMessage
 from html import escape
 
-from search_jobs import get_job_link
-
 GMAIL_SMTP_HOST = "smtp.gmail.com"
 GMAIL_SMTP_PORT = 587
 
@@ -37,7 +35,7 @@ def build_email_html(track_results, min_score):
                     {score}/10
                   </td>
                   <td style="padding:8px 12px;border-bottom:1px solid #ddd;">
-                    <a href="{escape(get_job_link(job))}" style="font-weight:bold;
+                    <a href="{escape(job.get("link", "N/A"))}" style="font-weight:bold;
                        text-decoration:none;color:#1a73e8;">
                       {escape(job.get("title", "N/A"))}
                     </a><br>

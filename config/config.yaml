@@ -1,21 +1,10 @@
 # Job Hunter Bot - Search Configuration
 # Edit these values to tune what the bot searches for and how it scores results.
 
-location:
-  # TEMPORARY SANITY CHECK: the Austin, TX + gl='us' test returned 10 real
-  # jobs per track, proving the pipeline itself works. Now isolating whether
-  # gl='il' specifically was the blocker, by putting Tel Aviv back as the
-  # location while keeping gl='us'.
-  city: "Tel Aviv, Israel"
-  radius_km: 10
-
 # Each track is searched separately and scored against its own resume.
 tracks:
   - id: data_analyst
     name: "Data Analyst / BI"
-    # TEMPORARY: dropped the "OR" chain to a single plain term to test
-    # whether Google Jobs' search box honors "OR" as an operator at all.
-    search_query: "Data Analyst"
     resume_file: "resumes/data_analyst_resume.txt"
     # Used for keyword-filtering Telegram messages (case-insensitive
     # substring match). Add more terms as false negatives show up.
@@ -36,8 +25,6 @@ tracks:
 
   - id: project_manager
     name: "Project Manager / Operations"
-    # TEMPORARY: same single-term test as the track above.
-    search_query: "Project Manager"
     resume_file: "resumes/project_manager_resume.txt"
     keywords:
       - "project manager"
@@ -46,16 +33,6 @@ tracks:
       - "pmo"
       - "operations specialist"
       - "production specialist"
-
-# SerpApi Google Jobs settings (https://serpapi.com/google-jobs-api)
-serpapi:
-  engine: "google_jobs"
-  google_domain: "google.com"
-  hl: "en"   # interface language
-  # TEMPORARY SANITY CHECK: kept as "us" - see the "location" section
-  # comment above for why. gl='il' is the leading suspect for the
-  # zero-results issue.
-  gl: "us"   # country
 
 # AI scoring settings (Claude API)
 scoring:

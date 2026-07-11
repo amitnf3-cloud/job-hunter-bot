@@ -33,6 +33,10 @@ WORKDAY_JOB_PATH_RE = re.compile(r"^/([^/]+)/job/(.+)$", re.IGNORECASE)
 MARKDOWN_LINK_RE = re.compile(r"\[[^\]]*\]\((https?://[^\s\)]+)\)")
 BARE_URL_RE = re.compile(r"https?://[^\s\)\]]+")
 
+# Some ATS platforms (e.g. Comeet) leak unrendered template placeholders
+# like "{{position.name}}" into the page's raw HTML text.
+TEMPLATE_PLACEHOLDER_RE = re.compile(r"\{\{[^{}]*\}\}")
+
 
 def get_message_url(message_text):
     """Extract the first real hyperlink from a message's rendered text, or
@@ -55,7 +59,9 @@ def extract_visible_text(html):
     soup = BeautifulSoup(html, "html.parser")
     for tag in soup(["script", "style", "noscript"]):
         tag.decompose()
-    return soup.get_text(separator=" ", strip=True)
+    text = soup.get_text(separator=" ", strip=True)
+    text = TEMPLATE_PLACEHOLDER_RE.sub("", text)
+    return re.sub(r"\s+", " ", text).strip()
 
 
 def is_workday_url(url):

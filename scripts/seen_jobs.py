@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Track which jobs have already been found, so the same job is never
-included twice. Jobs are keyed by a stable ID (see get_job_id in
-search_jobs.py) mapped to the date they were first seen. Entries older
-than MAX_AGE_DAYS are dropped so the file doesn't grow forever.
+included twice. Jobs are keyed by a stable ID mapped to the date they were
+first seen. Entries older than MAX_AGE_DAYS are dropped so the file
+doesn't grow forever.
 """
 
 import json
