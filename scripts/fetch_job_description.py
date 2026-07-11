@@ -6,6 +6,7 @@ JS-rendered page with nothing meaningful in the raw HTML).
 """
 
 import re
+from urllib.parse import urlparse
 
 import requests
 from bs4 import BeautifulSoup
@@ -13,6 +14,16 @@ from bs4 import BeautifulSoup
 REQUEST_TIMEOUT_SECONDS = 10
 MIN_DESCRIPTION_LENGTH = 200
 USER_AGENT = "Mozilla/5.0 (compatible; JobHunterBot/1.0)"
+
+# Workday career pages (*.myworkdayjobs.com) are JS-rendered SPAs - a plain
+# GET returns an empty shell, with the real content loaded client-side from
+# a JSON API. This is a best-effort, UNVERIFIED-AGAINST-A-LIVE-ENDPOINT
+# rewrite based on Workday's documented CXS URL shape; if it's wrong or the
+# API responds unexpectedly, it fails closed and falls through to the
+# normal fetch (and ultimately the Telegram-text fallback) rather than
+# raising.
+WORKDAY_JOB_PATH_WITH_LOCALE_RE = re.compile(r"^/([a-z0-9\-]{2,10})/([^/]+)/job/(.+)$", re.IGNORECASE)
+WORKDAY_JOB_PATH_RE = re.compile(r"^/([^/]+)/job/(.+)$", re.IGNORECASE)
 
 # Telethon's `message.text` renders MessageEntityTextUrl entities as
 # markdown link syntax "[visible text](url)" - regex-matching this is more
@@ -47,10 +58,67 @@ def extract_visible_text(html):
     return soup.get_text(separator=" ", strip=True)
 
 
+def is_workday_url(url):
+    return urlparse(url).netloc.lower().endswith("myworkdayjobs.com")
+
+
+def workday_api_url(url):
+    """Rewrite a Workday career-page URL into its underlying CXS JSON API
+    URL, or return None if the path doesn't match the expected shape."""
+    parsed = urlparse(url)
+
+    match = WORKDAY_JOB_PATH_WITH_LOCALE_RE.match(parsed.path)
+    if match:
+        _locale, site, job_path = match.groups()
+    else:
+        match = WORKDAY_JOB_PATH_RE.match(parsed.path)
+        if not match:
+            return None
+        site, job_path = match.groups()
+
+    tenant = parsed.netloc.split(".")[0]
+    return f"{parsed.scheme}://{parsed.netloc}/wday/cxs/{tenant}/{site}/job/{job_path}"
+
+
+def fetch_workday_description(url, timeout):
+    """Best-effort: fetch a Workday job's real description via its CXS
+    JSON API instead of the JS-rendered HTML shell. Returns None (never
+    raises) if the URL doesn't match, the request fails, or the response
+    isn't the expected JSON shape - the caller falls through to the normal
+    HTML fetch and ultimately the Telegram-text fallback."""
+    api_url = workday_api_url(url)
+    if not api_url:
+        return None
+
+    try:
+        response = requests.get(
+            api_url,
+            timeout=timeout,
+            headers={"User-Agent": USER_AGENT, "Accept": "application/json"},
+        )
+        response.raise_for_status()
+        data = response.json()
+    except (requests.RequestException, ValueError):
+        return None
+
+    job_posting_info = data.get("jobPostingInfo") or {}
+    html_description = job_posting_info.get("jobDescription")
+    if not html_description:
+        return None
+
+    return extract_visible_text(html_description)
+
+
 def fetch_job_description(url, timeout=REQUEST_TIMEOUT_SECONDS, min_length=MIN_DESCRIPTION_LENGTH):
     """Fetch `url` and return its extracted visible text, or None if the
     fetch fails, times out, or the extracted text is too short to be a
     real job description."""
+    if is_workday_url(url):
+        workday_text = fetch_workday_description(url, timeout)
+        if workday_text and len(workday_text) >= min_length:
+            return workday_text
+        # Fall through to the generic fetch below as a last resort.
+
     try:
         response = requests.get(url, timeout=timeout, headers={"User-Agent": USER_AGENT})
         response.raise_for_status()
