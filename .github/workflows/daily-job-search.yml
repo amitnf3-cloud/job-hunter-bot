@@ -2,11 +2,14 @@ name: Daily Job Search
 
 on:
   schedule:
-    # 09:00 UTC = 12:00 PM Israel time while Israel is on daylight saving
-    # time (IDT, UTC+3). When Israel exits daylight saving time later in
-    # the year (IST, UTC+2), this will land at 11:00 AM Israel time instead
-    # - update to "0 10 * * *" at that point to keep it at 12:00 PM.
-    - cron: "0 9 * * *"
+    # ~09:12 UTC = ~12:12 PM Israel time while Israel is on daylight saving
+    # time (IDT, UTC+3). Offset a few minutes past the hour on purpose -
+    # GitHub's scheduler gets congested right at the top of the hour, which
+    # caused real multi-hour delays (and one missed day) when this was
+    # "0 9 * * *". When Israel exits daylight saving time later in the year
+    # (IST, UTC+2), this will land at ~11:12 AM Israel time instead - update
+    # to "12 10 * * *" at that point to keep it around noon.
+    - cron: "12 9 * * *"
   workflow_dispatch: {}
 
 permissions:
