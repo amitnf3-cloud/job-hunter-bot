@@ -1,8 +1,14 @@
 #!/usr/bin/env python3
-"""Diagnostic: fetch today's real messages from the Telegram group and run
-them through filter_messages(), to see match counts per track and spot
-keyword gaps in messages that matched neither track. Read-only - no
-scoring, no dedup, nothing gets sent.
+"""Diagnostic: fetch real messages from the Telegram group and run them
+through filter_messages(), to see match counts per track and spot keyword
+gaps in messages that matched neither track. Read-only - no scoring, no
+dedup, nothing gets sent.
+
+By default uses config.yaml's telegram.hours_lookback. Override with the
+HOURS_LOOKBACK_OVERRIDE environment variable to check a longer window
+without touching the production config, e.g.:
+
+    HOURS_LOOKBACK_OVERRIDE=72 python scripts/test_filter_on_real_messages.py
 """
 
 import os
@@ -17,8 +23,6 @@ from filter_messages import filter_messages
 
 load_dotenv()  # loads .env into the environment for local runs, if present
 
-UNMATCHED_SAMPLE_SIZE = 15
-
 
 def main():
     api_id = os.environ.get("TELEGRAM_API_ID")
@@ -32,7 +36,8 @@ def main():
 
     config = load_config()
     group = config["telegram"]["group"]
-    hours_lookback = config["telegram"]["hours_lookback"]
+    hours_override = os.environ.get("HOURS_LOOKBACK_OVERRIDE")
+    hours_lookback = int(hours_override) if hours_override else config["telegram"]["hours_lookback"]
 
     with TelegramClient(StringSession(session_string), int(api_id), api_hash) as client:
         messages = fetch_recent_messages(client, group, hours_lookback)
@@ -45,7 +50,13 @@ def main():
     for _, track in matched_pairs:
         counts[track["name"]] = counts.get(track["name"], 0) + 1
 
-    print("=== Matches per track ===")
+    print("=== Matched messages, by track ===")
+    for message, track in matched_pairs:
+        preview = message.text.replace("\n", " ")[:200]
+        print(f"\n[{message.id}] {message.date.isoformat()} -> {track['name']}")
+        print(f"  {preview}")
+
+    print("\n=== Matches per track (summary) ===")
     for name, count in counts.items():
         print(f"  {name}: {count}")
     if not counts:
@@ -54,9 +65,9 @@ def main():
     matched_ids = {message.id for message, _ in matched_pairs}
     unmatched = [m for m in messages if m.id not in matched_ids]
 
-    print(f"\n=== Unmatched messages ({len(unmatched)} total, showing up to {UNMATCHED_SAMPLE_SIZE}) ===")
-    for message in unmatched[:UNMATCHED_SAMPLE_SIZE]:
-        preview = message.text.replace("\n", " ")[:200]
+    print(f"\n=== Unmatched messages ({len(unmatched)} total - review these for keyword gaps) ===")
+    for message in unmatched:
+        preview = message.text.replace("\n", " ")[:300]
         print(f"\n[{message.id}] {message.date.isoformat()}")
         print(f"  {preview}")
 

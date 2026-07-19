@@ -1,0 +1,35 @@
+name: Diagnostic - Filter Check
+
+on:
+  workflow_dispatch:
+    inputs:
+      hours_lookback:
+        description: "Hours to look back (overrides config.yaml for this run only)"
+        required: false
+        default: "72"
+
+permissions:
+  contents: read
+
+jobs:
+  filter-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run filter diagnostic (read-only - no scoring, no email)
+        env:
+          TELEGRAM_API_ID: ${{ secrets.TELEGRAM_API_ID }}
+          TELEGRAM_API_HASH: ${{ secrets.TELEGRAM_API_HASH }}
+          TELEGRAM_SESSION_STRING: ${{ secrets.TELEGRAM_SESSION_STRING }}
+          HOURS_LOOKBACK_OVERRIDE: ${{ github.event.inputs.hours_lookback }}
+        run: python scripts/test_filter_on_real_messages.py
