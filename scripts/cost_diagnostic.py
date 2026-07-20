@@ -27,7 +27,8 @@ from score_job import MODEL, SYSTEM_PROMPT, SCORE_SCHEMA, build_job_summary
 # Pricing per 1M tokens (input/output) - from the current model pricing table.
 PRICING = {
     "claude-opus-4-8": (5.00, 25.00),
-    "claude-sonnet-5": (3.00, 15.00),  # $2/$10 introductory through 2026-08-31
+    "claude-sonnet-5": (3.00, 15.00),
+    "claude-sonnet-5 (introductory, through 2026-08-31)": (2.00, 10.00),
 }
 
 SAMPLE_SIZE = 5
@@ -113,11 +114,26 @@ def main():
     if all_tokens:
         avg_all = sum(all_tokens) / len(all_tokens)
         print(f"\nCombined average input_tokens/job: {avg_all:.0f}")
-        print("Extrapolated to yesterday's 120-job run:")
+
+        print("\nExtrapolated to yesterday's 120-job backlog run:")
         for model, (in_price, out_price) in PRICING.items():
             est_output_tokens = 150
             per_job = (avg_all / 1_000_000) * in_price + (est_output_tokens / 1_000_000) * out_price
             print(f"    at {model}: ~${per_job * 120:.2f} for 120 jobs")
+
+        # "Normal day" batch size: Telegram has consistently matched ~4-5
+        # pairs/day in real runs so far. JobNet's ongoing (non-backlog) daily
+        # volume is NOT yet known - today's 115 was a one-time catch-up of
+        # every currently-open listing. 5 is an illustrative placeholder,
+        # not a measured number - tomorrow's real run will confirm it.
+        normal_day_telegram = 5
+        normal_day_jobnet_placeholder = 5
+        normal_day_total = normal_day_telegram + normal_day_jobnet_placeholder
+        print(f"\nIllustrative 'normal day' ({normal_day_telegram} Telegram + {normal_day_jobnet_placeholder} JobNet placeholder = {normal_day_total} jobs/day - JobNet's ongoing rate is unconfirmed until tomorrow's real run):")
+        for model, (in_price, out_price) in PRICING.items():
+            est_output_tokens = 150
+            per_job = (avg_all / 1_000_000) * in_price + (est_output_tokens / 1_000_000) * out_price
+            print(f"    at {model}: ~${per_job * normal_day_total:.4f}/day (~${per_job * normal_day_total * 30:.2f}/30-day month)")
 
 
 if __name__ == "__main__":

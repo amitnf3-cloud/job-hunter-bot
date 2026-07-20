@@ -17,7 +17,7 @@ from dotenv import load_dotenv
 
 load_dotenv()  # loads .env into the environment for local runs, if present
 
-MODEL = "claude-opus-4-8"
+MODEL = "claude-sonnet-5"
 
 SCORE_SCHEMA = {
     "type": "object",
