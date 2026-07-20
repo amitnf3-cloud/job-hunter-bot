@@ -13,6 +13,11 @@ from bs4 import BeautifulSoup
 
 REQUEST_TIMEOUT_SECONDS = 10
 MIN_DESCRIPTION_LENGTH = 200
+# Caps the text sent to Claude for scoring - some pages (e.g. JobNet's own
+# site chrome/nav around the real posting) are much bulkier than an ATS
+# page's description, and the extra length doesn't improve scoring quality
+# enough to justify the added input tokens.
+MAX_DESCRIPTION_LENGTH = 4000
 USER_AGENT = "Mozilla/5.0 (compatible; JobHunterBot/1.0)"
 
 # Workday career pages (*.myworkdayjobs.com) are JS-rendered SPAs - a plain
@@ -115,14 +120,19 @@ def fetch_workday_description(url, timeout):
     return extract_visible_text(html_description)
 
 
-def fetch_job_description(url, timeout=REQUEST_TIMEOUT_SECONDS, min_length=MIN_DESCRIPTION_LENGTH):
-    """Fetch `url` and return its extracted visible text, or None if the
-    fetch fails, times out, or the extracted text is too short to be a
-    real job description."""
+def fetch_job_description(
+    url,
+    timeout=REQUEST_TIMEOUT_SECONDS,
+    min_length=MIN_DESCRIPTION_LENGTH,
+    max_length=MAX_DESCRIPTION_LENGTH,
+):
+    """Fetch `url` and return its extracted visible text (capped to
+    max_length), or None if the fetch fails, times out, or the extracted
+    text is too short to be a real job description."""
     if is_workday_url(url):
         workday_text = fetch_workday_description(url, timeout)
         if workday_text and len(workday_text) >= min_length:
-            return workday_text
+            return workday_text[:max_length]
         # Fall through to the generic fetch below as a last resort.
 
     try:
@@ -134,18 +144,24 @@ def fetch_job_description(url, timeout=REQUEST_TIMEOUT_SECONDS, min_length=MIN_D
     text = extract_visible_text(response.text)
     if len(text) < min_length:
         return None
-    return text
+    return text[:max_length]
 
 
-def get_job_description(message_text, timeout=REQUEST_TIMEOUT_SECONDS, min_length=MIN_DESCRIPTION_LENGTH):
+def get_job_description(
+    message_text,
+    timeout=REQUEST_TIMEOUT_SECONDS,
+    min_length=MIN_DESCRIPTION_LENGTH,
+    max_length=MAX_DESCRIPTION_LENGTH,
+):
     """Return the best available job description for a message: the
     fetched career-page text if a link exists and the fetch succeeds with
     enough content, otherwise the raw Telegram message text as a fallback.
+    Both are capped to max_length.
     """
     url = get_message_url(message_text)
     if url:
-        description = fetch_job_description(url, timeout=timeout, min_length=min_length)
+        description = fetch_job_description(url, timeout=timeout, min_length=min_length, max_length=max_length)
         if description:
             return description, url
 
-    return message_text, url
+    return message_text[:max_length], url

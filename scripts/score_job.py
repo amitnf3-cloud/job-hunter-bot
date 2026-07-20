@@ -61,35 +61,42 @@ SCORE_SCHEMA = {
 }
 
 
-def score_job(job: dict, resume_text: str, client: anthropic.Anthropic) -> dict:
-    """Return a dict with score/reason plus location, company_name, and
-    company_description extracted from the job posting text, for how well
-    the job fits the resume."""
-    job_summary = (
+SYSTEM_PROMPT = (
+    "You score how well a job posting matches a candidate's resume, "
+    "and extract a few structured details from the posting. "
+    "Score from 1 (poor fit) to 10 (excellent fit), and give a short, "
+    "specific reason. Base the score only on the resume and job "
+    "description provided - do not assume unstated qualifications. "
+    "Also extract: the job's actual work location (city/area, and "
+    "remote/hybrid if stated) and the hiring company's name, both "
+    "read directly from the job posting text (use null if not "
+    "stated - do not guess). Also extract a brief one-or-two "
+    "sentence company_description, but ONLY if the posting contains "
+    "an actual 'About us' or company-description section - if there "
+    "is no such section, return null rather than inferring one from "
+    "the company name."
+)
+
+
+def build_job_summary(job: dict) -> str:
+    return (
         f"Title: {job.get('title', 'N/A')}\n"
         f"Company: {job.get('company_name', 'N/A')}\n"
         f"Location: {job.get('location', 'N/A')}\n"
         f"Description: {job.get('description', 'N/A')}"
     )
 
+
+def score_job(job: dict, resume_text: str, client: anthropic.Anthropic) -> dict:
+    """Return a dict with score/reason plus location, company_name, and
+    company_description extracted from the job posting text, for how well
+    the job fits the resume."""
+    job_summary = build_job_summary(job)
+
     response = client.messages.create(
         model=MODEL,
         max_tokens=1024,
-        system=(
-            "You score how well a job posting matches a candidate's resume, "
-            "and extract a few structured details from the posting. "
-            "Score from 1 (poor fit) to 10 (excellent fit), and give a short, "
-            "specific reason. Base the score only on the resume and job "
-            "description provided - do not assume unstated qualifications. "
-            "Also extract: the job's actual work location (city/area, and "
-            "remote/hybrid if stated) and the hiring company's name, both "
-            "read directly from the job posting text (use null if not "
-            "stated - do not guess). Also extract a brief one-or-two "
-            "sentence company_description, but ONLY if the posting contains "
-            "an actual 'About us' or company-description section - if there "
-            "is no such section, return null rather than inferring one from "
-            "the company name."
-        ),
+        system=SYSTEM_PROMPT,
         output_config={"format": {"type": "json_schema", "schema": SCORE_SCHEMA}},
         messages=[
             {

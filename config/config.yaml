@@ -74,6 +74,12 @@ telegram:
   # doesn't mention location at all is included - this filter only cuts
   # obvious noise before spending Claude tokens; the scoring step already
   # judges location fit well on its own.
+  #
+  # "remote"/"hybrid" are intentionally NOT in this list - they say nothing
+  # about which city the role is hybrid/remote *to*, so they must not
+  # override an explicit exclude like "Jerusalem" (see
+  # filter_messages.FLEXIBLE_LOCATION_KEYWORDS, checked with lower priority
+  # than an exclude).
   location_keywords:
     - "tel aviv"
     - "תל אביב"
@@ -84,8 +90,6 @@ telegram:
     - "petah tikva"
     - "petach tikva"
     - "פתח תקווה"
-    - "remote"
-    - "hybrid"
   location_exclude_keywords:
     - "usa"
     - "united states"
@@ -93,3 +97,8 @@ telegram:
     - "san francisco"
     - "europe"
     - "uk "
+    # Jerusalem alone shouldn't count as "Tel Aviv area" - a posting is
+    # still included if it ALSO mentions Tel Aviv/Ramat Gan/Petah Tikva
+    # (checked first, before this exclude list).
+    - "jerusalem"
+    - "ירושלים"
