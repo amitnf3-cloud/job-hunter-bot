@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
-"""Daily pipeline: fetch recent Telegram messages, filter by track/location
-keywords, fetch each matching job's real description (falling back to the
-Telegram text when that fails), score against the matching resume, skip
-jobs already seen, and email a digest of the rest.
+"""Daily pipeline: fetch recent Telegram messages and JobNet postings,
+filter by track/location keywords, fetch each matching job's real
+description (falling back to the Telegram text when that fails), score
+against the matching resume, skip jobs already seen, and email ONE
+combined digest of the rest - both sources feed the same scoring/email
+pipeline rather than sending separate emails.
 
 Replaces the earlier SerpApi/Google Jobs source, which had no usable
 coverage for Israel.
@@ -22,6 +24,7 @@ from telethon.sessions import StringSession
 from fetch_telegram_messages import fetch_recent_messages
 from filter_messages import filter_messages
 from fetch_job_description import get_job_description
+from fetch_jobnet_positions import fetch_jobnet_jobs
 from score_job import score_job
 from seen_jobs import load_seen, save_seen, prune_old_entries
 from send_email import build_email_html, send_email
@@ -74,7 +77,7 @@ def apply_extracted_fields(job, result):
         job["company_description"] = result["company_description"]
 
 
-def get_job_id(message, track):
+def get_telegram_job_id(message, track):
     return f"{message.id}:{track['id']}"
 
 
@@ -129,19 +132,32 @@ def main():
         messages = fetch_recent_messages(client, group, hours_lookback)
 
     matched_pairs = filter_messages(messages, config)
-    print(f"{len(messages)} message(s) fetched, {len(matched_pairs)} matched (message, track) pair(s)")
+    print(f"Telegram: {len(messages)} message(s) fetched, {len(matched_pairs)} matched (message, track) pair(s)")
 
     resumes = {track["id"]: load_resume(track["resume_file"]) for track in config["tracks"]}
     scored_by_track_id = {track["id"]: [] for track in config["tracks"]}
 
+    # Gather new (not-yet-seen) candidates from both sources into one list
+    # before scoring, so they feed the same scoring loop and end up in one
+    # combined digest rather than two separate emails.
+    candidates = []  # (job_id, job, track)
+
     for message, track in matched_pairs:
-        job_id = get_job_id(message, track)
+        job_id = get_telegram_job_id(message, track)
         if job_id in seen:
             continue  # already scored in a previous run - skip
 
         description, url = get_job_description(message.text)
         job = build_job_dict(message, description, url, group)
+        candidates.append((job_id, job, track))
 
+    jobnet_matches = fetch_jobnet_jobs(config, seen=seen)
+    print(f"JobNet: {len(jobnet_matches)} new matched job(s)")
+    candidates.extend(jobnet_matches)
+
+    print(f"{len(candidates)} total new job(s) to score")
+
+    for job_id, job, track in candidates:
         result = score_job(job, resumes[track["id"]], client_ai)
         apply_extracted_fields(job, result)
         scored_by_track_id[track["id"]].append((result["score"], result["reason"], job))

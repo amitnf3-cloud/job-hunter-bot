@@ -96,13 +96,18 @@ def build_job_dict(title, link, description):
     }
 
 
-def fetch_jobnet_jobs(config):
-    """Return a list of (job, track, positionid) tuples for JobNet
-    postings matching a track's mapped categories and the shared location
-    filter. positionid is returned separately (not embedded in the job
-    dict) so the caller can build a dedup key namespaced from Telegram's
-    message-id-based keys, e.g. f"jobnet:{positionid}:{track['id']}".
-    """
+def get_job_id(positionid, track):
+    """Namespaced from Telegram's message-id-based keys (which are bare
+    integers), since a JobNet positionid could otherwise collide with one."""
+    return f"jobnet:{positionid}:{track['id']}"
+
+
+def fetch_jobnet_jobs(config, seen=None):
+    """Return a list of (job_id, job, track) tuples for JobNet postings
+    matching a track's mapped categories and the shared location filter.
+    Postings whose job_id is already in `seen` are skipped before the
+    (network-costly) description fetch, not just before scoring."""
+    seen = seen or {}
     location_keywords = config["telegram"]["location_keywords"]
     location_exclude_keywords = config["telegram"]["location_exclude_keywords"]
 
@@ -110,9 +115,13 @@ def fetch_jobnet_jobs(config):
     for track in config["tracks"]:
         for subprofid in CATEGORY_IDS_BY_TRACK.get(track["id"], []):
             for positionid, title, link in fetch_category_listings(subprofid):
+                job_id = get_job_id(positionid, track)
+                if job_id in seen:
+                    continue
+
                 description = fetch_job_description(link) or title
                 if not matches_location(f"{title} {description}", location_keywords, location_exclude_keywords):
                     continue
                 job = build_job_dict(title, link, description)
-                matched.append((job, track, positionid))
+                matched.append((job_id, job, track))
     return matched
