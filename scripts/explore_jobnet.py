@@ -1,15 +1,11 @@
 #!/usr/bin/env python3
 """One-off exploration script - NOT part of the production pipeline.
 
-Round 2: now that we know /AllCategories lists subprofession categories as
-plain <a href="/jobs?subprofid=NNN"> links, and /jobs?subprofid=NNN is a
-simple GET-based results page (no VIEWSTATE/POST needed), this:
-  1. Dumps the FULL category list (id -> label) from /AllCategories, so we
-     can find every relevant Data Analyst/BI and Project Manager/Operations
-     category id, not just the ones a narrow keyword search happened to hit.
-  2. Fetches /jobs?subprofid=1561 (Data Analyst) directly to inspect the
-     real result listing structure (job cards: title/company/location/link)
-     and pagination, and to look for a region/location filter parameter.
+Round 3: quick pagination check (does subprofid=1561 page 2 differ from
+page 1? does a bigger category like 683 show more than ~10 results and
+any visible "next page" / result-count text?) and a quick glance for a
+free-text search parameter. Not spending much time here - just confirming
+before writing the real scraper.
 
 Safe to delete once the real jobnet.py source module exists.
 """
@@ -27,77 +23,48 @@ HEADERS = {
 }
 
 
-def dump_all_categories():
-    url = "https://www.jobnet.co.il/AllCategories"
-    print(f"\n{'=' * 80}\nFetching: {url}")
-    resp = requests.get(url, headers=HEADERS, timeout=20)
-    print(f"  status={resp.status_code} length={len(resp.text)}")
-
-    soup = BeautifulSoup(resp.text, "html.parser")
-    links = soup.find_all("a", href=re.compile(r"/jobs\?subprofid=\d+"))
-    print(f"  {len(links)} subprofid link(s) found:")
+def job_links(html):
+    soup = BeautifulSoup(html, "html.parser")
+    links = soup.find_all("a", href=re.compile(r"positionid=\d+"))
+    ids = []
     for a in links:
-        subprofid = re.search(r"subprofid=(\d+)", a["href"]).group(1)
-        print(f"    subprofid={subprofid}\ttext={a.get_text(strip=True)!r}")
-
-    # also check for a parent "professionid" grouping and any region links
-    prof_links = soup.find_all("a", href=re.compile(r"professionid=\d+"))
-    print(f"  {len(prof_links)} professionid link(s) found:")
-    for a in prof_links[:30]:
-        print(f"    href={a['href']!r} text={a.get_text(strip=True)!r}")
-
-    region_links = soup.find_all("a", href=re.compile(r"region", re.IGNORECASE))
-    print(f"  {len(region_links)} region-related link(s) found:")
-    for a in region_links[:30]:
-        print(f"    href={a['href']!r} text={a.get_text(strip=True)!r}")
+        m = re.search(r"positionid=(\d+)", a["href"])
+        if m and m.group(1) not in ids:
+            ids.append(m.group(1))
+    return ids, soup
 
 
-def inspect_results_page(subprofid, label):
-    url = f"https://www.jobnet.co.il/jobs?subprofid={subprofid}"
+def check(url, label):
     print(f"\n{'=' * 80}\nFetching: {url}  ({label})")
     resp = requests.get(url, headers=HEADERS, timeout=20)
-    print(f"  status={resp.status_code} length={len(resp.text)} final_url={resp.url}")
+    print(f"  status={resp.status_code} length={len(resp.text)}")
+    ids, soup = job_links(resp.text)
+    print(f"  {len(ids)} unique positionid(s): {ids}")
 
-    soup = BeautifulSoup(resp.text, "html.parser")
+    # look for any visible result-count or pagination text/elements
+    text = soup.get_text(" ", strip=True)
+    for pattern in [r"\d+\s*תוצאות", r"\d+\s*משרות", r"results", r"עמוד \d+"]:
+        hits = re.findall(pattern, text)
+        if hits:
+            print(f"  text matching {pattern!r}: {hits[:5]}")
 
-    # job posting links tend to follow a pattern like /jobs?positionid=NNN
-    job_links = soup.find_all("a", href=re.compile(r"positionid=\d+"))
-    print(f"  {len(job_links)} job posting link(s) found (first 15):")
-    seen = set()
-    for a in job_links:
-        href = a["href"]
-        if href in seen:
-            continue
-        seen.add(href)
-        if len(seen) > 15:
-            break
-        print(f"    href={href!r} text={a.get_text(strip=True)[:80]!r}")
+    pagers = soup.find_all(["a", "li"], class_=re.compile("pag", re.IGNORECASE))
+    print(f"  {len(pagers)} element(s) with a 'pag*' class")
+    for p in pagers[:10]:
+        print(f"    <{p.name} class={p.get('class')}> text={p.get_text(strip=True)!r}")
 
-    # look for pagination controls
-    pagination = soup.find_all("a", href=re.compile(r"[?&]p=\d+"))
-    print(f"  {len(pagination)} pagination link(s) found (first 10):")
-    for a in pagination[:10]:
-        print(f"    href={a['href']!r} text={a.get_text(strip=True)!r}")
-
-    # look for any region/location filter links on this results page
-    region_links = soup.find_all("a", href=re.compile(r"region", re.IGNORECASE))
-    print(f"  {len(region_links)} region-related link(s) on results page:")
-    for a in region_links[:20]:
-        print(f"    href={a['href']!r} text={a.get_text(strip=True)!r}")
-
-    # dump a job card's surrounding structure for the first couple results
-    print("  --- first 2 job link(s) with surrounding HTML context ---")
-    for a in job_links[:2]:
-        block = a
-        for _ in range(3):
-            if block.parent:
-                block = block.parent
-        print(f"    context html:\n{str(block)[:800]}\n")
+    return ids
 
 
 def main():
-    dump_all_categories()
-    inspect_results_page(1561, "Data Analyst")
+    ids_p1 = check("https://www.jobnet.co.il/jobs?subprofid=1561", "Data Analyst, page 1")
+    ids_p2 = check("https://www.jobnet.co.il/jobs?subprofid=1561&p=2", "Data Analyst, ?p=2")
+    print(f"\n  page1 vs page2 identical? {ids_p1 == ids_p2}")
+
+    check("https://www.jobnet.co.il/jobs?subprofid=683", "DWH/BO/BI (bigger category)")
+
+    # quick glance for a free-text param - not spending much time if absent
+    check("https://www.jobnet.co.il/jobs?FreeText=Project+Manager", "guess: FreeText param")
 
 
 if __name__ == "__main__":
