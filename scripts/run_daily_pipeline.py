@@ -162,8 +162,12 @@ def main():
         apply_extracted_fields(job, result)
         scored_by_track_id[track["id"]].append((result["score"], result["reason"], job))
         seen[job_id] = today
+        # Save after every job, not just at the end - if scoring crashes
+        # partway through (e.g. hitting an API credit limit) a re-run
+        # picks up where it left off instead of re-scoring everything.
+        save_seen(seen_jobs_path, seen)
 
-    save_seen(seen_jobs_path, seen)
+    save_seen(seen_jobs_path, seen)  # also covers pruning-only runs with no new candidates
 
     track_results = []
     for track in config["tracks"]:
