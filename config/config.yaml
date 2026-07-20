@@ -37,6 +37,11 @@ tracks:
       - "pmo"
       - "operations specialist"
       - "production specialist"
+      - "product execution manager"
+      # Hebrew for "operations" - catches Hebrew-titled postings like
+      # "רכז.ת תפעול ואדמיניסטרציה" (Operations & Administration Coordinator)
+      # that the English-only keywords above were structurally missing.
+      - "תפעול"
 
 # AI scoring settings (Claude API)
 scoring:
