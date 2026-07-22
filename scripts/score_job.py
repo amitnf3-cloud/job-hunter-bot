@@ -10,6 +10,7 @@ job before it's wired into the real pipeline.
 import json
 import os
 import sys
+import time
 from pathlib import Path
 
 import anthropic
@@ -18,6 +19,12 @@ from dotenv import load_dotenv
 load_dotenv()  # loads .env into the environment for local runs, if present
 
 MODEL = "claude-sonnet-5"
+
+# Anthropic's API occasionally returns a transient 529 "overloaded" error
+# with no fault on our end - retry a few times with backoff rather than
+# letting one flaky request kill the whole scoring run.
+MAX_RETRIES = 3
+RETRY_BACKOFF_SECONDS = 5
 
 SCORE_SCHEMA = {
     "type": "object",
@@ -112,18 +119,25 @@ def score_job(job: dict, resume_text: str, client: anthropic.Anthropic) -> dict:
     the job fits the resume."""
     job_summary = build_job_summary(job)
 
-    response = client.messages.create(
-        model=MODEL,
-        max_tokens=1024,
-        system=SYSTEM_PROMPT,
-        output_config={"format": {"type": "json_schema", "schema": SCORE_SCHEMA}},
-        messages=[
-            {
-                "role": "user",
-                "content": f"RESUME:\n{resume_text}\n\nJOB POSTING:\n{job_summary}",
-            }
-        ],
-    )
+    for attempt in range(MAX_RETRIES + 1):
+        try:
+            response = client.messages.create(
+                model=MODEL,
+                max_tokens=1024,
+                system=SYSTEM_PROMPT,
+                output_config={"format": {"type": "json_schema", "schema": SCORE_SCHEMA}},
+                messages=[
+                    {
+                        "role": "user",
+                        "content": f"RESUME:\n{resume_text}\n\nJOB POSTING:\n{job_summary}",
+                    }
+                ],
+            )
+            break
+        except anthropic.OverloadedError:
+            if attempt == MAX_RETRIES:
+                raise
+            time.sleep(RETRY_BACKOFF_SECONDS * (2**attempt))
 
     text = next(block.text for block in response.content if block.type == "text")
     return json.loads(text)
