@@ -1,0 +1,25 @@
+name: Diagnostic - Comeet Exploration
+
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  comeet-explore:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Explore Comeet's public Careers API for the 12 candidate companies (no secrets needed)
+        run: python scripts/explore_comeet.py
