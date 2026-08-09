@@ -11,22 +11,35 @@ separately rather than blocking the other ten.
 
 Unlike Greenhouse, Comeet's API has no description field anywhere -
 confirmed live on both the positions list AND the single-position detail
-endpoint, for every company checked. Real description text only exists
-on each position's own hosted page, so each track/location-matched
-position's description is fetched from there via fetch_job_description()
-(the same generic HTML extractor JobNet/Telegram already use), falling
-back to the bare title if that fails - fetched only for matches, not the
-full listing, to keep this cheap.
+endpoint, for every company checked. The hosted position page's VISIBLE
+text is also useless - confirmed live that it's just Comeet's own site
+chrome/error shell, identical across every job, because the real
+description is rendered client-side (Angular) from a `POSITION_DATA` JSON
+blob embedded inside a <script> tag, which a generic script-stripping
+text extractor never sees. The real content lives in that JSON at
+custom_fields.details[].value (field name "Description"), confirmed live
+in both English (Pentera) and Hebrew (Abra) postings - so it's extracted
+directly via regex + json, with the (shorter, SEO-truncated but still
+real) `og:description` meta tag as a fallback, and the bare title as the
+last resort. Fetched only for track/location matches, not the full
+listing, to keep this cheap.
 """
+
+import html as html_module
+import json
+import re
 
 import requests
 
-from fetch_job_description import fetch_job_description
+from fetch_job_description import extract_visible_text, MAX_DESCRIPTION_LENGTH
 from filter_messages import matching_tracks
 
 API_BASE = "https://www.comeet.co/careers-api/2.0/company"
 USER_AGENT = "Mozilla/5.0 (compatible; JobHunterBot/1.0)"
 REQUEST_TIMEOUT_SECONDS = 10
+
+DESCRIPTION_FIELD_RE = re.compile(r'"name"\s*:\s*"Description"\s*,\s*"value"\s*:\s*"((?:[^"\\]|\\.)*)"')
+OG_DESCRIPTION_RE = re.compile(r'<meta[^>]+property="og:description"[^>]+content="([^"]*)"', re.IGNORECASE)
 
 # (display name, Comeet company uid, Comeet public token) - both are
 # deliberately embedded in that company's own public careers page HTML
@@ -59,6 +72,40 @@ def fetch_company_positions(uid, token, timeout=REQUEST_TIMEOUT_SECONDS):
         return []
     data = response.json()
     return data if isinstance(data, list) else data.get("positions", [])
+
+
+def fetch_position_description(url, timeout=REQUEST_TIMEOUT_SECONDS):
+    """Extract the real job description from a Comeet-hosted position
+    page. Tries the embedded POSITION_DATA custom field first (full,
+    untruncated HTML, confirmed present in both English and Hebrew
+    postings); falls back to the og:description meta tag (real but
+    SEO-truncated); returns None if neither is present, letting the
+    caller fall back to the bare title."""
+    try:
+        response = requests.get(url, timeout=timeout, headers={"User-Agent": USER_AGENT})
+        response.raise_for_status()
+    except requests.RequestException:
+        return None
+    page_html = response.text
+
+    match = DESCRIPTION_FIELD_RE.search(page_html)
+    if match:
+        try:
+            raw_html_description = json.loads(f'"{match.group(1)}"')
+        except json.JSONDecodeError:
+            raw_html_description = None
+        if raw_html_description:
+            text = extract_visible_text(raw_html_description)
+            if text:
+                return text[:MAX_DESCRIPTION_LENGTH]
+
+    match = OG_DESCRIPTION_RE.search(page_html)
+    if match:
+        text = html_module.unescape(match.group(1)).strip()
+        if text:
+            return text[:MAX_DESCRIPTION_LENGTH]
+
+    return None
 
 
 def build_job_dict(title, company_name, location, description, link):
@@ -112,7 +159,7 @@ def fetch_comeet_jobs(config, seen=None):
                     continue
 
                 link = position.get("url_comeet_hosted_page", "")
-                description = fetch_job_description(link) or title
+                description = fetch_position_description(link) or title
                 location_name = location.get("name") or "N/A"
                 job_dict = build_job_dict(title, company_name, location_name, description, link)
                 matched.append((job_id, job_dict, track))

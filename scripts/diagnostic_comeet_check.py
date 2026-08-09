@@ -4,10 +4,10 @@
 Verifies each candidate Comeet (uid, token) pair in fetch_comeet_jobs.py
 actually resolves against the real API, shows how many jobs match our
 tracks/location filter, and - critically - fetches a real description for
-a couple of matched jobs to confirm fetch_job_description() actually
-extracts usable text from Comeet's hosted job pages (the API itself has
-no description field at all, confirmed via explore_comeet.py). No
-secrets needed - the Careers API uses a public read-only token.
+a couple of matched jobs to confirm fetch_position_description() actually
+extracts real per-job content (not duplicate site-chrome boilerplate)
+from Comeet's hosted job pages. No secrets needed - the Careers API uses
+a public read-only token.
 
 Safe to delete once the token list and description-fetch approach are
 confirmed correct.
