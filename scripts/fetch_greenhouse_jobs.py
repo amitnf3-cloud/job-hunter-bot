@@ -13,7 +13,7 @@ HTML description in a single call, no per-job requests needed.
 import requests
 
 from fetch_job_description import extract_visible_text, MAX_DESCRIPTION_LENGTH
-from filter_messages import matches_location, matching_tracks
+from filter_messages import matching_tracks
 
 API_BASE = "https://boards-api.greenhouse.io/v1/boards"
 USER_AGENT = "Mozilla/5.0 (compatible; JobHunterBot/1.0)"
@@ -64,10 +64,30 @@ def get_job_id(greenhouse_job_id, track):
     return f"greenhouse:{greenhouse_job_id}:{track['id']}"
 
 
+def _location_is_relevant(location, location_keywords, location_exclude_keywords):
+    """Stricter than filter_messages.matches_location(): Telegram/JobNet are
+    Israel-only sources, so an unstated/ambiguous location there safely
+    defaults to include. Greenhouse boards are global company-wide
+    listings with a clean, structured location field per job (unlike
+    Telegram's free text) - confirmed via a live test run that the
+    permissive default let through obviously-foreign postings (Singapore,
+    Seoul, Lisbon, Mexico City, Kyiv, Shanghai...) because our exclude
+    list can't enumerate every non-Israel country. So here, ambiguous
+    defaults to EXCLUDE unless the location explicitly says Israel.
+    """
+    lowered = (location or "").lower()
+    if any(keyword.lower() in lowered for keyword in location_keywords):
+        return True
+    if any(keyword.lower() in lowered for keyword in location_exclude_keywords):
+        return False
+    return "israel" in lowered or "ישראל" in lowered
+
+
 def fetch_greenhouse_jobs(config, seen=None):
     """Return a list of (job_id, job, track) tuples for Greenhouse postings
-    matching a track's keywords and the shared location filter. Postings
-    whose job_id is already in `seen` are skipped before scoring."""
+    matching a track's keywords and the (stricter, Israel-only) location
+    filter. Postings whose job_id is already in `seen` are skipped before
+    scoring."""
     seen = seen or {}
     location_keywords = config["telegram"]["location_keywords"]
     location_exclude_keywords = config["telegram"]["location_exclude_keywords"]
@@ -82,11 +102,11 @@ def fetch_greenhouse_jobs(config, seen=None):
             raw_content = job.get("content", "")
             description = extract_visible_text(raw_content)[:MAX_DESCRIPTION_LENGTH] if raw_content else title
 
-            text_for_filtering = f"{title} {location} {description}"
-            if not matches_location(text_for_filtering, location_keywords, location_exclude_keywords):
+            if not _location_is_relevant(location, location_keywords, location_exclude_keywords):
                 continue
 
-            for track in matching_tracks(text_for_filtering, tracks):
+            text_for_track_matching = f"{title} {description}"
+            for track in matching_tracks(text_for_track_matching, tracks):
                 job_id = get_job_id(job.get("id"), track)
                 if job_id in seen:
                     continue
