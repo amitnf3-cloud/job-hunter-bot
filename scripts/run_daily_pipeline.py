@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""Daily pipeline: fetch recent Telegram messages and JobNet postings,
-filter by track/location keywords, fetch each matching job's real
-description (falling back to the Telegram text when that fails), score
-against the matching resume, skip jobs already seen, and email ONE
-combined digest of the rest - both sources feed the same scoring/email
-pipeline rather than sending separate emails.
+"""Daily pipeline: fetch recent Telegram messages, JobNet postings, and
+Greenhouse job-board listings, filter by track/location keywords, fetch
+each matching job's real description (falling back to the Telegram text
+when that fails), score against the matching resume, skip jobs already
+seen, and email ONE combined digest of the rest - all sources feed the
+same scoring/email pipeline rather than sending separate emails.
 
 Replaces the earlier SerpApi/Google Jobs source, which had no usable
 coverage for Israel.
@@ -25,6 +25,7 @@ from fetch_telegram_messages import fetch_recent_messages
 from filter_messages import filter_messages
 from fetch_job_description import get_job_description
 from fetch_jobnet_positions import fetch_jobnet_jobs
+from fetch_greenhouse_jobs import fetch_greenhouse_jobs
 from score_job import score_job
 from seen_jobs import load_seen, save_seen, prune_old_entries
 from send_email import build_email_html, send_email
@@ -154,6 +155,10 @@ def main():
     jobnet_matches = fetch_jobnet_jobs(config, seen=seen)
     print(f"JobNet: {len(jobnet_matches)} new matched job(s)")
     candidates.extend(jobnet_matches)
+
+    greenhouse_matches = fetch_greenhouse_jobs(config, seen=seen)
+    print(f"Greenhouse: {len(greenhouse_matches)} new matched job(s)")
+    candidates.extend(greenhouse_matches)
 
     print(f"{len(candidates)} total new job(s) to score")
 
