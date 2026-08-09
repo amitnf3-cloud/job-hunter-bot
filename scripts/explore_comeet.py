@@ -69,6 +69,20 @@ def try_positions_api(uid, token):
     return response, None
 
 
+def try_single_position_api(uid, token, position_uid):
+    """The positions LIST endpoint has no description field - check
+    whether a per-position detail endpoint returns the actual job
+    description text, which score_job() needs for real signal (a bare
+    title produces the same weak/generic scoring we already saw on
+    thin JobNet postings)."""
+    url = f"https://www.comeet.co/careers-api/2.0/company/{uid}/positions/{position_uid}"
+    try:
+        response = requests.get(url, params={"token": token}, timeout=REQUEST_TIMEOUT_SECONDS, headers={"User-Agent": USER_AGENT})
+    except requests.RequestException as e:
+        return None, str(e)
+    return response, None
+
+
 def main():
     for name, slug, uid in CANDIDATES:
         print(f"\n=== {name} (slug={slug}, uid={uid}) ===")
@@ -110,6 +124,27 @@ def main():
                 if isinstance(positions, list) and positions:
                     print(f"  Sample position keys: {list(positions[0].keys())}")
                     print(f"  Sample position: {json.dumps(positions[0])[:500]}")
+
+                    position_uid = positions[0].get("uid")
+                    if position_uid:
+                        detail_response, detail_err = try_single_position_api(real_uid, token, position_uid)
+                        if detail_err:
+                            print(f"  Single-position detail API FAILED: {detail_err}")
+                        else:
+                            print(f"  Single-position detail API -> HTTP {detail_response.status_code}")
+                            if detail_response.status_code == 200:
+                                try:
+                                    detail_data = detail_response.json()
+                                    print(f"  Detail keys: {list(detail_data.keys())}")
+                                    has_desc = "description" in detail_data
+                                    print(f"  Has 'description' field: {has_desc}")
+                                    if has_desc:
+                                        print(f"  Description preview: {str(detail_data['description'])[:300]}")
+                                except (ValueError, AttributeError) as e:
+                                    print(f"  Could not parse detail response: {e}")
+                                    print(f"  Raw snippet: {detail_response.text[:300]}")
+                            else:
+                                print(f"  Detail response snippet: {detail_response.text[:300]}")
             except (ValueError, AttributeError) as e:
                 print(f"  Could not parse response as JSON: {e}")
                 print(f"  Raw response snippet: {response.text[:300]}")
