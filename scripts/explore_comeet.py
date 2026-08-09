@@ -69,6 +69,59 @@ def try_positions_api(uid, token):
     return response, None
 
 
+JS_STATE_VAR_NAMES = [
+    "POSITION_DATA",
+    "JOB_DATA",
+    "__INITIAL_STATE__",
+    "__NEXT_DATA__",
+    "__NUXT__",
+    "__APOLLO_STATE__",
+    "PRELOADED_STATE",
+    "initialState",
+]
+
+
+def inspect_position_page_for_description(url):
+    """The Careers API has no description field anywhere, and the
+    hosted position page's VISIBLE text turned out to be just site
+    chrome/an error shell (confirmed live via diagnostic_comeet_check.py
+    - Abra's fetched "description" was identical boilerplate across all
+    9 matched jobs). Check whether the real description text is embedded
+    server-side as JSON inside a <script> tag instead - our generic
+    extractor strips <script> tags, so it would have missed this even if
+    present. Prints any embedded JS state variable found, and searches
+    raw HTML for the word "description" for a broader net."""
+    try:
+        response = requests.get(url, timeout=REQUEST_TIMEOUT_SECONDS, headers={"User-Agent": USER_AGENT})
+        response.raise_for_status()
+    except requests.RequestException as e:
+        print(f"    FAILED to fetch position page: {e}")
+        return
+    html = response.text
+    print(f"    Position page length: {len(html)}")
+
+    for var_name in JS_STATE_VAR_NAMES:
+        idx = html.find(var_name)
+        if idx != -1:
+            print(f"    Found JS state var '{var_name}' at offset {idx}")
+            print(f"    Context: ...{html[idx:idx+400]}...")
+
+    # Broader net: every occurrence of "description" (case-insensitive),
+    # in case the real content is under some other variable name entirely.
+    lowered = html.lower()
+    found_at = []
+    start = 0
+    while True:
+        idx = lowered.find("description", start)
+        if idx == -1 or len(found_at) >= 5:
+            break
+        found_at.append(idx)
+        start = idx + 1
+    print(f"    'description' appears {len(found_at)}+ time(s) in raw HTML, first few contexts:")
+    for idx in found_at:
+        print(f"      ...{html[max(0, idx-80):idx+200]}...")
+
+
 def try_single_position_api(uid, token, position_uid):
     """The positions LIST endpoint has no description field - check
     whether a per-position detail endpoint returns the actual job
@@ -124,6 +177,11 @@ def main():
                 if isinstance(positions, list) and positions:
                     print(f"  Sample position keys: {list(positions[0].keys())}")
                     print(f"  Sample position: {json.dumps(positions[0])[:500]}")
+
+                    hosted_page_url = positions[0].get("url_comeet_hosted_page")
+                    if hosted_page_url:
+                        print(f"  Inspecting hosted position page for embedded description data: {hosted_page_url}")
+                        inspect_position_page_for_description(hosted_page_url)
 
                     position_uid = positions[0].get("uid")
                     if position_uid:
