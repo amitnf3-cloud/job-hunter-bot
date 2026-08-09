@@ -1,0 +1,25 @@
+name: Diagnostic - Comeet Token Check
+
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  comeet-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Verify Comeet uid/token pairs and description-fetch quality against the live API (no secrets needed)
+        run: python scripts/diagnostic_comeet_check.py
