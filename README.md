@@ -15,8 +15,10 @@ job-hunter-bot/
 ├── config/
 │   └── config.yaml                    # tracks, keywords, scoring, email, Telegram settings
 ├── resumes/
-│   ├── data_analyst_resume.txt        # your Data Analyst/BI resume
-│   └── project_manager_resume.txt     # your PM/Operations resume
+│   ├── data_analyst_resume.txt        # redacted placeholder (tracked) - shows the expected format only
+│   ├── project_manager_resume.txt     # redacted placeholder (tracked) - shows the expected format only
+│   ├── data_analyst_resume.local.txt  # your REAL Data Analyst/BI resume (gitignored, not tracked)
+│   └── project_manager_resume.local.txt # your REAL PM/Operations resume (gitignored, not tracked)
 ├── data/
 │   └── seen_jobs.json                 # record of already-seen jobs (job_id -> date)
 ├── scripts/
@@ -57,3 +59,14 @@ job-hunter-bot/
 Copy `.env.example` to `.env` and fill in your API keys/app password/Telegram
 credentials for local testing. In GitHub Actions, the same names are set as
 repository secrets instead (nothing gets committed).
+
+For local runs, put your real resume text directly in
+`resumes/data_analyst_resume.local.txt` and
+`resumes/project_manager_resume.local.txt` (gitignored - never committed).
+The tracked `resumes/*.txt` files are redacted placeholders kept only to
+show the expected format.
+
+For the GitHub Actions daily run, your real resume text also needs to exist
+as two repository secrets - `DATA_ANALYST_RESUME` and
+`PROJECT_MANAGER_RESUME` (full resume text as the secret value) - which the
+workflow writes to the same `*.local.txt` paths at the start of each run.

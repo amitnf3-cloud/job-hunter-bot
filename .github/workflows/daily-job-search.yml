@@ -30,6 +30,14 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
+      - name: Write resume files from secrets
+        env:
+          DATA_ANALYST_RESUME: ${{ secrets.DATA_ANALYST_RESUME }}
+          PROJECT_MANAGER_RESUME: ${{ secrets.PROJECT_MANAGER_RESUME }}
+        run: |
+          printf '%s' "$DATA_ANALYST_RESUME" > resumes/data_analyst_resume.local.txt
+          printf '%s' "$PROJECT_MANAGER_RESUME" > resumes/project_manager_resume.local.txt
+
       - name: Run job search, scoring, dedup, and email digest
         env:
           TELEGRAM_API_ID: ${{ secrets.TELEGRAM_API_ID }}

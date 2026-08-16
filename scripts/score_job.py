@@ -148,7 +148,7 @@ def main():
     if not api_key:
         sys.exit("ERROR: ANTHROPIC_API_KEY environment variable is not set.")
 
-    resume_path = Path(__file__).resolve().parent.parent / "resumes" / "data_analyst_resume.txt"
+    resume_path = Path(__file__).resolve().parent.parent / "resumes" / "data_analyst_resume.local.txt"
     resume_text = resume_path.read_text(encoding="utf-8")
 
     sample_job = {

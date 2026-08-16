@@ -61,7 +61,7 @@ def main():
 
     client = anthropic.Anthropic()
     config = load_config()
-    resume_text = open("resumes/data_analyst_resume.txt", encoding="utf-8").read()
+    resume_text = open("resumes/data_analyst_resume.local.txt", encoding="utf-8").read()
 
     print(f"Model under test: {MODEL}\n")
 

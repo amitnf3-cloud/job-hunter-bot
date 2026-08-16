@@ -22,7 +22,7 @@ import anthropic
 
 from score_job import score_job
 
-RESUME_PATH = Path(__file__).resolve().parent.parent / "resumes" / "data_analyst_resume.txt"
+RESUME_PATH = Path(__file__).resolve().parent.parent / "resumes" / "data_analyst_resume.local.txt"
 
 LARGE_GAP_JOB = {
     "title": "BI Analyst",

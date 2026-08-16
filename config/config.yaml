@@ -5,7 +5,10 @@
 tracks:
   - id: data_analyst
     name: "Data Analyst / BI"
-    resume_file: "resumes/data_analyst_resume.txt"
+    # .local.txt - untracked, real resume content (see .gitignore /
+    # README). resumes/data_analyst_resume.txt is a redacted placeholder
+    # kept in git only to show the expected structure/format.
+    resume_file: "resumes/data_analyst_resume.local.txt"
     # Used for keyword-filtering Telegram messages (case-insensitive
     # substring match). Add more terms as false negatives show up.
     keywords:
@@ -29,7 +32,10 @@ tracks:
 
   - id: project_manager
     name: "Project Manager / Operations"
-    resume_file: "resumes/project_manager_resume.txt"
+    # .local.txt - untracked, real resume content (see .gitignore /
+    # README). resumes/project_manager_resume.txt is a redacted
+    # placeholder kept in git only to show the expected structure/format.
+    resume_file: "resumes/project_manager_resume.local.txt"
     keywords:
       - "project manager"
       - "operations manager"
@@ -54,7 +60,9 @@ scoring:
 # Email digest settings
 email:
   subject_prefix: "Job Hunter Daily Digest"
-  recipient: "amitnf3@gmail.com"
+  # The recipient address is NOT here - it's the EMAIL_TO secret/env var
+  # (see run_daily_pipeline.py), so it doesn't need to be a public,
+  # committed value.
 
 # Where the bot keeps track of jobs it has already sent, to avoid duplicates.
 storage:

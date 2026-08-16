@@ -3,3 +3,8 @@ __pycache__/
 *.pyc
 .venv/
 venv/
+
+# Real resume content - the tracked resumes/*.txt files are redacted
+# placeholders (see README). Your actual resumes go in these *.local.txt
+# files instead, which stay untracked/local-only.
+resumes/*.local.txt
