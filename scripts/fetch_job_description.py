@@ -73,6 +73,10 @@ def is_workday_url(url):
     return urlparse(url).netloc.lower().endswith("myworkdayjobs.com")
 
 
+def is_comeet_url(url):
+    return urlparse(url).netloc.lower().endswith("comeet.com")
+
+
 def workday_api_url(url):
     """Rewrite a Workday career-page URL into its underlying CXS JSON API
     URL, or return None if the path doesn't match the expected shape."""
@@ -120,6 +124,22 @@ def fetch_workday_description(url, timeout):
     return extract_visible_text(html_description)
 
 
+def fetch_comeet_description(url, timeout):
+    """Best-effort: fetch a Comeet-hosted job's real description via the
+    same embedded-JSON extraction used by the native Comeet source
+    (fetch_comeet_jobs.py), instead of the generic HTML fetch below - a
+    plain visible-text extraction of a Comeet position page returns only
+    site chrome/error-shell boilerplate (the real description is rendered
+    client-side from a JSON blob), which is long enough to clear
+    min_length but is not the actual posting. Returns None (never raises)
+    if the URL doesn't match or nothing is found, letting the caller fall
+    through to the normal HTML fetch. Imported locally to avoid a circular
+    import, since fetch_comeet_jobs.py itself imports from this module."""
+    from fetch_comeet_jobs import fetch_position_description
+
+    return fetch_position_description(url, timeout=timeout)
+
+
 def fetch_job_description(
     url,
     timeout=REQUEST_TIMEOUT_SECONDS,
@@ -133,6 +153,12 @@ def fetch_job_description(
         workday_text = fetch_workday_description(url, timeout)
         if workday_text and len(workday_text) >= min_length:
             return workday_text[:max_length]
+        # Fall through to the generic fetch below as a last resort.
+
+    if is_comeet_url(url):
+        comeet_text = fetch_comeet_description(url, timeout)
+        if comeet_text and len(comeet_text) >= min_length:
+            return comeet_text[:max_length]
         # Fall through to the generic fetch below as a last resort.
 
     try:

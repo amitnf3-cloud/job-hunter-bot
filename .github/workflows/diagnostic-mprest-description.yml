@@ -21,5 +21,12 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      - name: Compare generic vs Comeet-specific description extraction for the mPrest job (no secrets needed)
+      - name: Write resume file from secret
+        env:
+          PROJECT_MANAGER_RESUME: ${{ secrets.PROJECT_MANAGER_RESUME }}
+        run: printf '%s' "$PROJECT_MANAGER_RESUME" > resumes/project_manager_resume.local.txt
+
+      - name: Compare generic vs Comeet-specific description extraction, then score the result, for the mPrest job
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: python scripts/diagnostic_mprest_description.py
