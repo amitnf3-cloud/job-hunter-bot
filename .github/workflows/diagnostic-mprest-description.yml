@@ -1,0 +1,25 @@
+name: Diagnostic - mPrest Description Fetch Comparison
+
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  mprest-description-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Compare generic vs Comeet-specific description extraction for the mPrest job (no secrets needed)
+        run: python scripts/diagnostic_mprest_description.py
