@@ -1,11 +1,4 @@
 {
-  "132963:project_manager": "2026-07-14",
-  "132971:project_manager": "2026-07-14",
-  "132986:project_manager": "2026-07-14",
-  "132990:project_manager": "2026-07-14",
-  "132992:project_manager": "2026-07-14",
-  "133006:project_manager": "2026-07-14",
-  "133018:data_analyst": "2026-07-14",
   "133072:project_manager": "2026-07-15",
   "133073:project_manager": "2026-07-15",
   "133080:data_analyst": "2026-07-15",
@@ -743,6 +736,8 @@
   "jobnet:13444939:data_analyst": "2026-09-11",
   "jobnet:13445003:project_manager": "2026-09-11",
   "jobnet:13445007:data_analyst": "2026-09-11",
+  "jobnet:13447371:project_manager": "2026-09-13",
+  "jobnet:13447699:project_manager": "2026-09-13",
   "jobnet:6685726:project_manager": "2026-07-20",
   "jobnet:8843278:project_manager": "2026-07-20"
 }
