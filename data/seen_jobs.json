@@ -1,7 +1,4 @@
 {
-  "133878:data_analyst": "2026-08-02",
-  "133881:data_analyst": "2026-08-02",
-  "133894:project_manager": "2026-08-02",
   "133951:project_manager": "2026-08-03",
   "133958:data_analyst": "2026-08-03",
   "133988:project_manager": "2026-08-03",
@@ -287,14 +284,6 @@
   "jobnet:13302227:project_manager": "2026-09-25",
   "jobnet:13311792:project_manager": "2026-08-03",
   "jobnet:13315001:data_analyst": "2026-08-10",
-  "jobnet:13316238:project_manager": "2026-08-02",
-  "jobnet:13318370:data_analyst": "2026-08-02",
-  "jobnet:13319057:project_manager": "2026-08-02",
-  "jobnet:13319536:project_manager": "2026-08-02",
-  "jobnet:13319869:project_manager": "2026-08-02",
-  "jobnet:13320114:project_manager": "2026-08-02",
-  "jobnet:13320445:project_manager": "2026-08-02",
-  "jobnet:13320618:project_manager": "2026-08-02",
   "jobnet:13321428:project_manager": "2026-08-03",
   "jobnet:13322449:project_manager": "2026-08-03",
   "jobnet:13322521:data_analyst": "2026-08-03",
@@ -681,6 +670,8 @@
   "jobnet:13487912:project_manager": "2026-09-30",
   "jobnet:13488252:data_analyst": "2026-09-30",
   "jobnet:13490512:data_analyst": "2026-10-01",
+  "jobnet:13491770:project_manager": "2026-10-02",
+  "jobnet:13491799:project_manager": "2026-10-02",
   "jobnet:6685726:project_manager": "2026-09-19",
   "jobnet:8843278:project_manager": "2026-09-19"
 }
