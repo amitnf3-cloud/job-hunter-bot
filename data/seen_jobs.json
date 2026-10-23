@@ -1,5 +1,4 @@
 {
-  "134910:project_manager": "2026-08-23",
   "134915:data_analyst": "2026-08-24",
   "134923:data_analyst": "2026-08-24",
   "134924:data_analyst": "2026-08-24",
@@ -185,6 +184,7 @@
   "137756:data_analyst": "2026-10-22",
   "137784:data_analyst": "2026-10-22",
   "137797:project_manager": "2026-10-22",
+  "137857:project_manager": "2026-10-23",
   "comeet:16.07F:project_manager": "2026-10-18",
   "comeet:1A.24A:project_manager": "2026-10-10",
   "comeet:33.154:project_manager": "2026-10-10",
@@ -671,8 +671,11 @@
   "jobnet:13545030:project_manager": "2026-10-21",
   "jobnet:13545570:project_manager": "2026-10-22",
   "jobnet:13545612:project_manager": "2026-10-22",
+  "jobnet:13545749:project_manager": "2026-10-23",
   "jobnet:13547534:project_manager": "2026-10-22",
   "jobnet:13548210:project_manager": "2026-10-22",
+  "jobnet:13548555:project_manager": "2026-10-23",
+  "jobnet:13548768:project_manager": "2026-10-23",
   "jobnet:6685726:project_manager": "2026-09-19",
   "jobnet:8843278:project_manager": "2026-09-19"
 }
